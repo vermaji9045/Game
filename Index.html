@@ -1,0 +1,222 @@
+<!-- By Sandeep Verma--><!doctype html>
+<html>
+ <head> 
+  <title>QUANZIC: By P. N Yadav</title> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0"> 
+  <style>
+     body{
+     width: 200px; 
+     height: 530px; 
+     background: linear-gradient(red, yellow, green);
+     }
+     h2{
+       color: white; 
+       position: relative; 
+       left: 120px; 
+     }
+     h6{
+       color: white; 
+      position: relative; 
+      left: 140px; 
+     }
+     #canvas{
+       background: black; 
+       height: 250px; 
+       width: 343px;
+       position: relative; 
+       border: 2px solid white; 
+     }
+     #left{
+      width: 60px; 
+      height: 60px; 
+      background: #0025FF;
+      position: relative; 
+      left: 87px; 
+      top: 0px; 
+     }
+     #right{
+       width: 60px; 
+      height: 60px; 
+      background: #0025FF;
+      position: relative; 
+      left: 140px; 
+      top: 0px; 
+     }
+     #fire{
+       width: 60px; 
+      height: 60px; 
+      background: #0025FF;
+      position: relative; 
+      left: 17px; 
+      top: -2px;
+   </style> 
+ </head> 
+ <body> 
+  <h2>QUANZIC</h2> 
+  <h6>BY Sandeep Verma</h6> 
+  <canvas id="canvas" width="200"></canvas> 
+  <br> 
+  <input type="button" value="⏮️" id="left" onmousedown="left()" ontouchstart="left()" onmouseup="stop()" ontouchend="stop()"> 
+  <input type="button" value="⏭️" id="right" onmousedown="right()" ontouchstart="right()" onmouseup="stop()" ontouchend="stop()"> 
+  <input type="button" value="💥" id="fire"> 
+  <script type="text/javascript">
+ const cvs = document.getElementById("canvas");
+  const ctx = cvs.getContext("2d");
+  var fire = document.getElementById("fire");
+  let bolts = [];
+  let invaders = [];
+  let ship_width = 1;
+  let ship_height = 1;
+  let total_invaders = 5;
+  let invaders_destroyed = 0;
+  let ship_velocity = 0;
+  let ship_velocityy = 0;
+  let invader_velocity = 1;
+  var score = 0;
+  var shipmap = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],   
+    [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0], 
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],   
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],   
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+  ];
+  var invadermap = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],   
+    [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],   
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],   
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  ];
+  
+  function Ship(x, y, c){
+    this.x = x; 
+    this.y = y;
+    this.w = ship_width; 
+    this.h = ship_height; 
+    this.c = c; 
+    this.draw = function(){
+      for(let a = 0; a < shipmap.length; a++){
+        for(let b = 0; b < shipmap[a].length; b++){
+          if(shipmap[a][b] == 1){
+            ctx.fillStyle = this.c;
+            ctx.fillRect(b*this.w+this.x, a*this.h+this.y, this.w, this.h);
+          }
+        }
+      }
+      
+    }
+    this.update = function(){
+      
+      this.x += ship_velocity;
+    }
+  } 
+  function Invader(x, y, c){
+    this.x = x; 
+    this.y = y;
+    this.w = ship_width; 
+    this.h = ship_height; 
+    this.c = c; 
+    this.draw = function(){
+      for(let a = 0; a < invadermap.length; a++){
+        for(let b = 0; b < invadermap[a].length; b++){
+          if(invadermap[a][b] == 1){
+            ctx.fillStyle = this.c;
+            ctx.fillRect(b*this.w+this.x, a*this.h+this.y, this.w, this.h);
+          }
+        }
+      }
+      
+    }
+    this.update = function(){
+      this.draw();
+      this.x += invader_velocity;
+    }
+  } 
+  function Bolt(x, y, vx, vy){
+    this.x = x; 
+    this.y = y;
+    this.w = 3; 
+    this.h = 9; 
+    this.c = "purple"; 
+    this.draw = function(){
+      ctx.fillStyle = this.c;
+      ctx.fillRect(this.x, this.y, this.w, this.h);
+    }
+    this.update = function(){
+      this.draw();
+      this.x += vx;
+      this.y += vy; 
+    }
+  } 
+  var ship = new Ship(cvs.width/2-10, cvs.height-17, "blue");
+  function invadersarecoming(){
+  setInterval(() => {
+   const ranone = Math.random() * canvas.height/2;
+    invaders.push(new Invader(-10, ranone, "red"));
+  }, 3000);}
+  function main(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  requestAnimationFrame(main);
+  ctx.fillStyle = "white";
+  ctx.fillText("Invaders Destroyed: " + score, 10, 10);
+ ship.draw();
+ ship.update();
+ bolts.forEach((bolt) => {
+      bolt.update();
+    });
+    invaders.forEach((invader, a) => {
+      invader.update();
+      bolts.forEach((bolt, b) => {
+        const proximity = Math.hypot(bolt.x-invader.x, 
+        bolt.y-invader.y+50);
+        if(proximity-bolt.w-invader.w < 1){
+          invaders.splice(a, 1);
+          bolts.splice(b, 1);
+          score++;
+        }
+      });
+    });
+    
+  }
+  fire.addEventListener("click", (event) => {
+    const angle = Math.atan2(event.clientY-ship.y, 
+    event.clientX-ship.x);
+    bolts.push(new Bolt(ship.x+9, ship.y-7, 0, -Math.sin(angle)*5));
+  });
+  function left(){
+    ship_velocity += -2;
+  }
+  function right(){
+    ship_velocity += 2;
+  }
+  function stop(){
+    ship_velocity = 0;
+  }
+ main();
+    invadersarecoming();
+</script> 
+ </body>
+</html>
